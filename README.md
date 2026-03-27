@@ -68,7 +68,7 @@ cp scripts/pre-commit .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 ```
 
-By default, the hook will run `java -jar target/bootguard.jar . --fail-on HIGH` to check your project.
+By default, the hook will automatically download the latest BootGuard release to `~/.bootguard/bootguard.jar` if not present, and run it with `--fail-on HIGH` to check your project.
 
 ## Contributing
 
