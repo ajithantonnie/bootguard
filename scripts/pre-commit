@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# BootGuard Git Pre-commit Hook
+
+# This hook runs BootGuard to scan the repository for Spring Boot security risks.
+
+# Find the repository root directory
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+# Optional: Path to the BootGuard JAR (customize if needed)
+BOOTGUARD_JAR="$REPO_ROOT/target/bootguard.jar"
+
+# Check if JAR exists
+if [ ! -f "$BOOTGUARD_JAR" ]; then
+  echo "[BootGuard Pre-commit] WARNING: bootguard.jar not found at $BOOTGUARD_JAR."
+  echo "Please build the project first or update the path in this hook."
+  # Allow the commit to proceed if the tool isn't built yet, or exit 1 to be strict.
+  exit 0
+fi
+
+echo "[BootGuard Pre-commit] Running security scan..."
+
+# Run BootGuard against the repository root.
+# Change --fail-on to MEDIUM or LOW if you want stricter checks.
+java -jar "$BOOTGUARD_JAR" "$REPO_ROOT" --fail-on HIGH
+
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo ""
+  echo "❌ [BootGuard Pre-commit] Security issues found! Commit aborted."
+  echo "Please fix the issues listed above or use 'git commit --no-verify' to bypass (not recommended)."
+  exit 1
+fi
+
+echo "✅ [BootGuard Pre-commit] Scan passed. No high-severity issues found."
+exit 0

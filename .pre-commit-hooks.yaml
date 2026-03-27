@@ -1,0 +1,8 @@
+- id: bootguard-scan
+  name: BootGuard Security Scan
+  description: Scans Spring Boot projects for security risks and misconfigurations
+  entry: java -jar target/bootguard.jar
+  language: system
+  pass_filenames: false
+  always_run: true
+  args: ["."]
