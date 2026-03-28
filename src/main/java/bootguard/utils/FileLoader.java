@@ -57,7 +57,8 @@ public class FileLoader {
         }
 
         File[] files = dir.listFiles();
-        if (files == null) return;
+        if (files == null)
+            return;
 
         for (File f : files) {
             if (f.isDirectory()) {
@@ -85,6 +86,7 @@ public class FileLoader {
         return map;
     }
 
+    @SuppressWarnings("unchecked")
     private static Map<String, String> loadYaml(File file) {
         Map<String, String> result = new HashMap<>();
         Yaml yaml = new Yaml();
