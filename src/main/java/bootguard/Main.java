@@ -46,10 +46,33 @@ public class Main implements Callable<Integer> {
             allIssues.addAll(ActuatorCheck.scan(config));
             allIssues.addAll(SecretScanner.scan(config));
             allIssues.addAll(DBConfigCheck.scan(config));
+            allIssues.addAll(CorsCheck.scan(config));
+            allIssues.addAll(H2ConsoleCheck.scan(config));
         }
 
         allIssues.addAll(DebugCheck.scan(configs));
         allIssues.addAll(GitIgnoreCheck.scan(configs));
+
+        // Downgrade dev-level risks to LOW severity if they belong to non-prod profiles
+        for (Issue issue : allIssues) {
+            String fileName = issue.getFile().getName().toLowerCase();
+            boolean isDevFile = fileName.contains("-dev.") || fileName.contains("-local.") || fileName.contains("-test.");
+            boolean isDevProfileInside = false;
+
+            for (FileLoader.ConfigFile config : configs) {
+                if (config.getFile().equals(issue.getFile())) {
+                    String profile = config.getProperties().get("spring.profiles.active");
+                    if (profile != null && !profile.toLowerCase().contains("prod")) {
+                        isDevProfileInside = true;
+                    }
+                    break;
+                }
+            }
+
+            if ((isDevFile || isDevProfileInside) && issue.getSeverity() != Issue.Severity.LOW) {
+                issue.setSeverity(Issue.Severity.LOW);
+            }
+        }
 
         allIssues.sort((i1, i2) -> i1.getSeverity().compareTo(i2.getSeverity()));
 

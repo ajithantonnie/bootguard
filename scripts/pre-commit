@@ -26,16 +26,23 @@ echo "[BootGuard Pre-commit] Running security scan..."
 
 # Run BootGuard against the repository root.
 # Change --fail-on to MEDIUM or LOW if you want stricter checks.
-java -jar "$JAR_PATH" "$REPO_ROOT" --fail-on HIGH
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-EXIT_CODE=$?
+if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" || "$CURRENT_BRANCH" == "production" || "$CURRENT_BRANCH" == release/* ]]; then
+  java -jar "$JAR_PATH" "$REPO_ROOT" --fail-on HIGH
+  EXIT_CODE=$?
 
-if [ $EXIT_CODE -ne 0 ]; then
-  echo ""
-  echo "❌ [BootGuard Pre-commit] Security issues found! Commit aborted."
-  echo "Please fix the issues listed above or use 'git commit --no-verify' to bypass (not recommended)."
-  exit 1
+  if [ $EXIT_CODE -ne 0 ]; then
+    echo ""
+    echo "❌ [BootGuard Pre-commit] Security issues found! Commit aborted for branch '$CURRENT_BRANCH'."
+    echo "Please fix the issues listed above or use 'git commit --no-verify' to bypass (not recommended)."
+    exit 1
+  fi
+else
+  echo "[BootGuard Pre-commit] Non-production branch ('$CURRENT_BRANCH') detected. Running in warning-only mode."
+  # We still run it to show warnings, but we ignore the exit code so it doesn't block the commit.
+  java -jar "$JAR_PATH" "$REPO_ROOT" --fail-on HIGH || true
 fi
 
-echo "✅ [BootGuard Pre-commit] Scan passed. No high-severity issues found."
+echo "✅ [BootGuard Pre-commit] Scan finished."
 exit 0

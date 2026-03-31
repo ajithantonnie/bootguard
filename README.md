@@ -12,6 +12,8 @@ Because waiting 10 minutes for your CI/CD pipeline to tell you your Actuator is 
   - Hardcoded secrets and database credentials
   - Debug mode enabled in production
   - Sensitive files committed (like `.env`, `application-prod.yml`)
+  - Overly permissive CORS configurations (e.g., wildcard allowed origins)
+  - Unsecured or inadvertently exposed H2 Database consoles
 
 ## Installation
 
@@ -69,6 +71,9 @@ chmod +x .git/hooks/pre-commit
 ```
 
 By default, the hook will automatically download the latest BootGuard release to `~/.bootguard/bootguard.jar` if not present, and run it with `--fail-on HIGH` to check your project.
+
+> [!TIP]
+> **Smart Branch Filtering**: To avoid disrupting local development, the hook automatically detects your active Git branch. It strictly enforces the scan (failing the commit) *only* on `main`, `master`, `production`, and `release/*` branches. If you are on a feature or `dev` branch, BootGuard will scan your project in warning-only mode, showing you security risks without blocking your commit!
 
 ## Contributing
 

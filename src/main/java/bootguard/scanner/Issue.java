@@ -8,7 +8,7 @@ public class Issue {
         HIGH, MEDIUM, LOW
     }
 
-    private final Severity severity;
+    private Severity severity;
     private final String description;
     private final String detail;
     private final File file;
@@ -22,6 +22,10 @@ public class Issue {
 
     public Severity getSeverity() {
         return severity;
+    }
+
+    public void setSeverity(Severity severity) {
+        this.severity = severity;
     }
 
     public String getDescription() {
