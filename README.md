@@ -38,6 +38,14 @@ To explicitly provide a custom property file from another location:
 java -jar bootguard.jar -c /path/to/shared-org-rules/bootguard.properties /path/to/your/spring-boot-project
 ```
 
+### Testing with the Demo App
+
+A deliberate vulnerable application is included in the `demo-app/` directory to demonstrate BootGuard capabilities.
+
+> [!NOTE]
+> To prevent secrets from leaking into Git history, the `demo-app/application.yml` file uses placeholders for API keys.
+> To fully test the **Secrets Scanner**, you can manually temporarily replace `PLACEHOLDER_STRIPE_KEY_12345` and `PLACEHOLDER_GITHUB_PAT_12345` with standard string formats that BootGuard recognizes, such as a dummy Stripe key (`sk_test_<your_dummy_key>`) or a GitHub token (`ghp_<your_dummy_token>`).
+
 ### Options
 
 | Flag | Description | Default |
