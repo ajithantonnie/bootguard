@@ -36,12 +36,16 @@ public class FileLoader {
 
     public static List<ConfigFile> loadConfigs(File directory) {
         List<ConfigFile> configs = new ArrayList<>();
-        if (!directory.exists() || !directory.isDirectory()) {
+        if (!directory.exists()) {
             return configs;
         }
 
         List<File> filesToProcess = new ArrayList<>();
-        findConfigFiles(directory, filesToProcess);
+        if (directory.isFile()) {
+            filesToProcess.add(directory);
+        } else {
+            findConfigFiles(directory, filesToProcess);
+        }
 
         for (File file : filesToProcess) {
             if (file.getName().endsWith(".properties")) {

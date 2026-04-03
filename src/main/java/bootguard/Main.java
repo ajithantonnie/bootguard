@@ -30,14 +30,15 @@ public class Main implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        if (!projectDir.exists() || !projectDir.isDirectory()) {
-            System.err.println("Error: Directory not found or is not a directory: " + projectDir.getAbsolutePath());
+        if (!projectDir.exists()) {
+            System.err.println("Error: File or directory not found: " + projectDir.getAbsolutePath());
             return 1;
         }
 
         System.out.println("Scanning project: " + projectDir.getName() + "\n");
 
-        File configToUse = configFile != null ? configFile : new File(projectDir, "bootguard.properties");
+        File parentDir = projectDir.isDirectory() ? projectDir : projectDir.getParentFile();
+        File configToUse = configFile != null ? configFile : new File(parentDir, "bootguard.properties");
         bootguard.utils.AppConfig.init(configToUse);
 
         List<FileLoader.ConfigFile> configs = FileLoader.loadConfigs(projectDir);
