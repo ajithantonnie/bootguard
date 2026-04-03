@@ -19,8 +19,8 @@ debug: true
 api-key: "sk-1234567890"
 
 custom-config:
-  stripe-sk: "STRIPE_SK_PLACEHOLDER"
-  github-pat: "GITHUB_PAT_PLACEHOLDER"
+  stripe-sk: "PLACEHOLDER_STRIPE_KEY_12345"
+  github-pat: "PLACEHOLDER_GITHUB_PAT_12345"
   
 app:
   name: "my-spring-boot-application"
