@@ -122,7 +122,7 @@ chmod +x .git/hooks/pre-commit
 ```yaml
 repos:
   - repo: https://github.com/ajithantonnie/bootguard
-    rev: v1.0.0
+    rev: v2.0.0
     hooks:
       - id: bootguard-scan
 ```

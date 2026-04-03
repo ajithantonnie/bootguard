@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-@CommandLine.Command(name = "bootguard", mixinStandardHelpOptions = true, version = "1.0", description = "Scans a Spring Boot project directory and flags risky configurations.")
+@CommandLine.Command(name = "bootguard", mixinStandardHelpOptions = true, version = "2.0", description = "Scans a Spring Boot project directory and flags risky configurations.")
 public class Main implements Callable<Integer> {
 
     @CommandLine.Parameters(index = "0", description = "The directory of the Spring Boot project to scan.")
