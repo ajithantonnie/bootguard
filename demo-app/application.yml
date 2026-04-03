@@ -17,3 +17,10 @@ management:
 
 debug: true
 api-key: "sk-1234567890"
+
+custom-config:
+  stripe-sk: "STRIPE_SK_PLACEHOLDER"
+  github-pat: "GITHUB_PAT_PLACEHOLDER"
+  
+app:
+  name: "my-spring-boot-application"

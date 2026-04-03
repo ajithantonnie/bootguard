@@ -9,11 +9,17 @@ public class GitIgnoreCheck {
     public static List<Issue> scan(List<FileLoader.ConfigFile> configs) {
         List<Issue> issues = new ArrayList<>();
         
+        List<String> sensitivePatterns = bootguard.utils.AppConfig.getStringList("sensitive.files.pattern");
+        if (sensitivePatterns.isEmpty()) { 
+            sensitivePatterns = java.util.Arrays.asList("-prod.yml", "-prod.yaml", "-prod.properties", ".env"); 
+        }
+        
         for (FileLoader.ConfigFile config : configs) {
             String name = config.getFile().getName().toLowerCase();
-            if (name.contains("-prod.yml") || name.contains("-prod.yaml") || name.contains("-prod.properties")) {
+            boolean isSensitive = sensitivePatterns.stream().anyMatch(name::contains);
+            if (isSensitive) {
                 issues.add(new Issue(Issue.Severity.LOW, "Sensitive config may be committed to VCS",
-                        "File found: " + config.getFile().getName(), config.getFile()));
+                        "File found: " + config.getFile().getName(), config.getFile(), config.getProfileContext()));
             }
         }
         

@@ -15,7 +15,7 @@ public class CorsCheck {
         
         if (allowedOrigins != null && allowedOrigins.contains("*")) {
             issues.add(new Issue(Issue.Severity.HIGH, "Overly permissive CORS configuration (Wildcard mapping)",
-                    "spring.web.cors.allowed-origins=" + allowedOrigins, config.getFile()));
+                    "spring.web.cors.allowed-origins=" + allowedOrigins, config.getFile(), config.getProfileContext()));
         }
         
         return issues;

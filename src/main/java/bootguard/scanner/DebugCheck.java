@@ -30,10 +30,10 @@ public class DebugCheck {
         
         if (hasDebug && hasProdProfile) {
             issues.add(new Issue(Issue.Severity.HIGH, "Debug enabled in production profile",
-                    "debug=true and spring.profiles.active=prod", debugFile.getFile()));
+                    "debug=true and spring.profiles.active=prod", debugFile.getFile(), debugFile.getProfileContext()));
         } else if (hasDebug) {
             issues.add(new Issue(Issue.Severity.LOW, "Debug enabled",
-                    "debug=true", debugFile.getFile()));
+                    "debug=true", debugFile.getFile(), debugFile.getProfileContext()));
         }
         
         return issues;

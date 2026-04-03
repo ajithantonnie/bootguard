@@ -13,10 +13,12 @@ public class FileLoader {
     public static class ConfigFile {
         private final File file;
         private final Map<String, String> properties;
+        private final String profileContext;
 
-        public ConfigFile(File file, Map<String, String> properties) {
+        public ConfigFile(File file, Map<String, String> properties, String profileContext) {
             this.file = file;
             this.properties = properties;
+            this.profileContext = profileContext;
         }
 
         public File getFile() {
@@ -25,6 +27,10 @@ public class FileLoader {
 
         public Map<String, String> getProperties() {
             return properties;
+        }
+
+        public String getProfileContext() {
+            return profileContext;
         }
     }
 
@@ -38,21 +44,32 @@ public class FileLoader {
         findConfigFiles(directory, filesToProcess);
 
         for (File file : filesToProcess) {
-            Map<String, String> props = new HashMap<>();
             if (file.getName().endsWith(".properties")) {
-                props = loadProperties(file);
+                Map<String, String> props = loadProperties(file);
+                configs.add(new ConfigFile(file, props, extractProfile(props)));
             } else if (file.getName().endsWith(".yml") || file.getName().endsWith(".yaml")) {
-                props = loadYaml(file);
+                List<Map<String, String>> docs = loadYaml(file);
+                for (Map<String, String> props : docs) {
+                    configs.add(new ConfigFile(file, props, extractProfile(props)));
+                }
             }
-            configs.add(new ConfigFile(file, props));
         }
 
         return configs;
     }
 
+    private static String extractProfile(Map<String, String> props) {
+        String profile = props.get("spring.config.activate.on-profile");
+        if (profile == null) {
+            profile = props.get("spring.profiles");
+        }
+        return profile;
+    }
+
     private static void findConfigFiles(File dir, List<File> result) {
         String name = dir.getName();
-        if (name.equals(".git") || name.equals("target") || name.equals("node_modules") || name.equals("build")) {
+        List<String> ignoredDirs = bootguard.utils.AppConfig.getStringList("ignore.directories");
+        if (ignoredDirs.contains(name)) {
             return;
         }
 
@@ -87,14 +104,16 @@ public class FileLoader {
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<String, String> loadYaml(File file) {
-        Map<String, String> result = new HashMap<>();
+    private static List<Map<String, String>> loadYaml(File file) {
+        List<Map<String, String>> results = new ArrayList<>();
         Yaml yaml = new Yaml();
         try (InputStream in = new FileInputStream(file)) {
             Iterable<Object> documents = yaml.loadAll(in);
             for (Object doc : documents) {
                 if (doc instanceof Map) {
-                    flattenMap("", (Map<String, Object>) doc, result);
+                    Map<String, String> flat = new HashMap<>();
+                    flattenMap("", (Map<String, Object>) doc, flat);
+                    results.add(flat);
                 }
             }
         } catch (IOException e) {
@@ -102,7 +121,7 @@ public class FileLoader {
         } catch (Exception e) {
             System.err.println("Bad formatting in YAML file: " + file.getAbsolutePath());
         }
-        return result;
+        return results;
     }
 
     @SuppressWarnings("unchecked")

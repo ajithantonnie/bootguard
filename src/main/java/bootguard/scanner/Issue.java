@@ -12,12 +12,14 @@ public class Issue {
     private final String description;
     private final String detail;
     private final File file;
+    private final String profileContext;
 
-    public Issue(Severity severity, String description, String detail, File file) {
+    public Issue(Severity severity, String description, String detail, File file, String profileContext) {
         this.severity = severity;
         this.description = description;
         this.detail = detail;
         this.file = file;
+        this.profileContext = profileContext;
     }
 
     public Severity getSeverity() {
@@ -38,6 +40,10 @@ public class Issue {
 
     public File getFile() {
         return file;
+    }
+
+    public String getProfileContext() {
+        return profileContext;
     }
 
     @Override

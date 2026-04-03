@@ -1,14 +1,13 @@
 package bootguard.scanner;
 
+import bootguard.utils.EntropyUtil;
 import bootguard.utils.FileLoader;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class SecretScanner {
-    private static final Pattern KEY_PATTERN = Pattern.compile("(?i)(password|secret|key|token)");
 
     public static List<Issue> scan(FileLoader.ConfigFile config) {
         List<Issue> issues = new ArrayList<>();
@@ -17,11 +16,16 @@ public class SecretScanner {
             String key = entry.getKey();
             String value = entry.getValue();
             
-            if (KEY_PATTERN.matcher(key).find()) {
-                if (value != null && !value.trim().isEmpty() && !value.trim().startsWith("${")) {
-                    issues.add(new Issue(Issue.Severity.HIGH, "Hardcoded secret found",
-                            key + "=" + value, config.getFile()));
-                }
+            EntropyUtil.DetectionResult result = EntropyUtil.checkSecret(key, value);
+            
+            if (result.isCaught) {
+                Issue.Severity severity = result.severity.equals("HIGH") ? Issue.Severity.HIGH : Issue.Severity.MEDIUM;
+                String detail = String.format("%s=%s (entropy: %.2f)", key, value, result.entropy);
+                String desc = result.severity.equals("HIGH") ? 
+                    "Hardcoded secret found (" + result.reason + ")" : 
+                    "Hardcoded risk finding (" + result.reason + ")";
+                
+                issues.add(new Issue(severity, desc, detail, config.getFile(), config.getProfileContext()));
             }
         }
         return issues;

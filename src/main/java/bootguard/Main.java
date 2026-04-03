@@ -20,6 +20,9 @@ public class Main implements Callable<Integer> {
     @CommandLine.Option(names = {"-f", "--fail-on"}, description = "Fail with non-zero exit code if issues of this severity or higher are found. Valid values: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}", defaultValue = "HIGH")
     private Issue.Severity failOnSeverity;
 
+    @CommandLine.Option(names = {"-c", "--config"}, description = "Path to custom bootguard.properties configuration file.")
+    private File configFile;
+
     public static void main(String[] args) {
         int exitCode = new CommandLine(new Main()).execute(args);
         System.exit(exitCode);
@@ -33,6 +36,9 @@ public class Main implements Callable<Integer> {
         }
 
         System.out.println("Scanning project: " + projectDir.getName() + "\n");
+
+        File configToUse = configFile != null ? configFile : new File(projectDir, "bootguard.properties");
+        bootguard.utils.AppConfig.init(configToUse);
 
         List<FileLoader.ConfigFile> configs = FileLoader.loadConfigs(projectDir);
         if (configs.isEmpty()) {
@@ -57,19 +63,11 @@ public class Main implements Callable<Integer> {
         for (Issue issue : allIssues) {
             String fileName = issue.getFile().getName().toLowerCase();
             boolean isDevFile = fileName.contains("-dev.") || fileName.contains("-local.") || fileName.contains("-test.");
-            boolean isDevProfileInside = false;
+            
+            String profileContext = issue.getProfileContext();
+            boolean isNonProdProfile = profileContext != null && !profileContext.toLowerCase().contains("prod");
 
-            for (FileLoader.ConfigFile config : configs) {
-                if (config.getFile().equals(issue.getFile())) {
-                    String profile = config.getProperties().get("spring.profiles.active");
-                    if (profile != null && !profile.toLowerCase().contains("prod")) {
-                        isDevProfileInside = true;
-                    }
-                    break;
-                }
-            }
-
-            if ((isDevFile || isDevProfileInside) && issue.getSeverity() != Issue.Severity.LOW) {
+            if ((isDevFile || isNonProdProfile) && issue.getSeverity() != Issue.Severity.LOW) {
                 issue.setSeverity(Issue.Severity.LOW);
             }
         }
