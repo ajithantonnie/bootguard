@@ -20,7 +20,7 @@ Because waiting 10 minutes for your CI/CD pipeline to tell you your Actuator is 
 
 ## Installation
 
-Download the latest executable JAR from the [Releases](#) page.
+Download the latest executable JAR from the [Releases](https://github.com/ajithantonnie/bootguard/releases) page.
 
 Requires **Java 17+**.
 
