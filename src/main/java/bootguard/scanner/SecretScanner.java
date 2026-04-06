@@ -15,6 +15,11 @@ public class SecretScanner {
         for (Map.Entry<String, String> entry : config.getProperties().entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
+
+            // Skip properties handled by specialized scanners to avoid duplication/noise
+            if (key.equals("server.server-header")) {
+                continue;
+            }
             
             EntropyUtil.DetectionResult result = EntropyUtil.checkSecret(key, value);
             

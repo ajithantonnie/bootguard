@@ -34,7 +34,7 @@ public class FileLoader {
         }
     }
 
-    public static List<ConfigFile> loadConfigs(File directory) {
+    public static List<ConfigFile> loadConfigs(File directory, File ignoreFile) {
         List<ConfigFile> configs = new ArrayList<>();
         if (!directory.exists()) {
             return configs;
@@ -42,9 +42,11 @@ public class FileLoader {
 
         List<File> filesToProcess = new ArrayList<>();
         if (directory.isFile()) {
-            filesToProcess.add(directory);
+            if (ignoreFile == null || !directory.getAbsolutePath().equals(ignoreFile.getAbsolutePath())) {
+                filesToProcess.add(directory);
+            }
         } else {
-            findConfigFiles(directory, filesToProcess);
+            findConfigFiles(directory, filesToProcess, ignoreFile);
         }
 
         for (File file : filesToProcess) {
@@ -70,8 +72,12 @@ public class FileLoader {
         return profile;
     }
 
-    private static void findConfigFiles(File dir, List<File> result) {
+    private static void findConfigFiles(File dir, List<File> result, File ignoreFile) {
         String name = dir.getName();
+        if (ignoreFile != null && dir.getAbsolutePath().equals(ignoreFile.getAbsolutePath())) {
+            return;
+        }
+
         List<String> ignoredDirs = bootguard.utils.AppConfig.getStringList("ignore.directories");
         if (ignoredDirs.contains(name)) {
             return;
@@ -83,9 +89,18 @@ public class FileLoader {
 
         for (File f : files) {
             if (f.isDirectory()) {
-                findConfigFiles(f, result);
+                findConfigFiles(f, result, ignoreFile);
             } else {
                 String fileName = f.getName();
+                if (ignoreFile != null && f.getAbsolutePath().equals(ignoreFile.getAbsolutePath())) {
+                    continue;
+                }
+                
+                // Always skip BootGuard's own configuration files regardless of exact match
+                if (fileName.toLowerCase().contains("bootguard") && fileName.endsWith(".properties")) {
+                    continue;
+                }
+
                 if (fileName.endsWith(".properties") || fileName.endsWith(".yml") || fileName.endsWith(".yaml")) {
                     result.add(f);
                 }

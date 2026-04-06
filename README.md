@@ -14,6 +14,8 @@ Because waiting 10 minutes for your CI/CD pipeline to tell you your Actuator is 
   - **Database:** Plain-text DB passwords and connections lacking SSL enforcement.
   - **Networking:** Overly permissive CORS configurations (e.g., wildcard allowed origins).
   - **H2 Console:** Unsecured or inadvertently exposed H2 Database web consoles with weak passwords.
+  - **Security Headers:** Checks for configuration of XSS-Protection, Frame-Options, Content-Type-Options, and HSTS.
+  - **Exposure:** Detects information leaking headers and error messages/stack traces in production.
   - **VCS Safety:** Detects sensitive files (e.g., `.env`, `application-prod.yml`) that might have been accidentally committed.
 - **⚖️ Context-Aware Severity:** Automatically downgrades the severity of issues found within `dev`, `test`, or `local` profile blocks to prevent blocking local development.
 - **⚙️ Fully Customizable:** Override security thresholds, regex patterns, and target directories using a simple `bootguard.properties` file.

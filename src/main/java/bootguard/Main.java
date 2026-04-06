@@ -41,7 +41,7 @@ public class Main implements Callable<Integer> {
         File configToUse = configFile != null ? configFile : new File(parentDir, "bootguard.properties");
         bootguard.utils.AppConfig.init(configToUse);
 
-        List<FileLoader.ConfigFile> configs = FileLoader.loadConfigs(projectDir);
+        List<FileLoader.ConfigFile> configs = FileLoader.loadConfigs(projectDir, configToUse);
         if (configs.isEmpty()) {
             System.out.println("No configuration files found. Scan complete.");
             return 0;
@@ -55,6 +55,8 @@ public class Main implements Callable<Integer> {
             allIssues.addAll(DBConfigCheck.scan(config));
             allIssues.addAll(CorsCheck.scan(config));
             allIssues.addAll(H2ConsoleCheck.scan(config));
+            allIssues.addAll(SecurityHeaderCheck.scan(config));
+            allIssues.addAll(ExposureCheck.scan(config));
         }
 
         allIssues.addAll(DebugCheck.scan(configs));

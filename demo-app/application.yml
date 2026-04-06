@@ -1,5 +1,9 @@
 server:
   port: 8080
+  server-header: "Apache/2.4.41 (Ubuntu)" # Fingerprinting risk
+  error:
+    include-stacktrace: always # High exposure risk
+    include-message: always # Medium exposure risk
 
 spring:
   profiles:
@@ -7,16 +11,40 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/db?useSSL=false
     username: root
-    password: admin123
+    password: admin123 # Hardcoded password
+  web:
+    security:
+      header:
+        xss:
+          enabled: false # XSS protection disabled
+    cors:
+      allowed-origins: "*" # CORS wildcard
+      allowed-methods: "*"
+  h2:
+    console:
+      enabled: true # H2 console exposed
+      path: /h2-console
+      settings:
+        web-allow-others: true # H2 console allows external access
 
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "*" # Actuator fully exposed
+  server:
+    port: 8080 # Same as server.port, increases exposure risk
 
-debug: true
-api-key: "sk-1234567890"
+debug: true # Debug mode enabled
+
+# Secrets and High Entropy Strings
+api-key: "sk-live-51MZ8v2S9G4L6p7Q3mW1r0t5u8v1w4x7y0z" # Stripe SK
+github-pat: "ghp_1234567890abcdefghijklmnopqrstuvwxyzAB" # GitHub PAT
+aws-key: "AKIAIOSFODNN7EXAMPLE" # AWS Key
+aws-secret: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY" # AWS Secret
+jwt-secret: "Vml2YSBMYXMgVmVnYXMh" # Base64 encoded secret
+random-token: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6" # High entropy random string
+db-password: "Password@123" # Pattern-based secret
 
 custom-config:
   stripe-sk: "PLACEHOLDER_STRIPE_KEY_12345"
