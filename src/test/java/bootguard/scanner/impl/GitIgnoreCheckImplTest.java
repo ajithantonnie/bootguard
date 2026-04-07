@@ -1,5 +1,6 @@
-package bootguard.scanner;
+package bootguard.scanner.impl;
 
+import bootguard.scanner.*;
 import bootguard.utils.AppConfig;
 import bootguard.utils.FileLoader;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class GitIgnoreCheckTest {
+class GitIgnoreCheckImplTest {
 
     @Mock
     private FileLoader.ConfigFile config1;
@@ -28,7 +29,7 @@ class GitIgnoreCheckTest {
 
     @BeforeEach
     void setUp() {
-        AppConfig.init(null); // Ensure AppConfig loads defaults or is initialized cleanly
+        new bootguard.utils.impl.AppConfigImpl().init(null); // Ensure AppConfig loads defaults or is initialized cleanly
     }
 
     @Test
@@ -39,7 +40,7 @@ class GitIgnoreCheckTest {
         lenient().when(config2.getFile()).thenReturn(new File("application.yml"));
         lenient().when(config2.getProfileContext()).thenReturn("default");
 
-        List<Issue> issues = GitIgnoreCheck.scan(Arrays.asList(config1, config2));
+        List<Issue> issues = new GitIgnoreCheckImpl().scan(Arrays.asList(config1, config2));
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.LOW, issues.get(0).getSeverity());
         assertEquals("Sensitive config may be committed to VCS", issues.get(0).getDescription());
@@ -50,7 +51,7 @@ class GitIgnoreCheckTest {
         lenient().when(config1.getFile()).thenReturn(new File("application.yml"));
         lenient().when(config1.getProfileContext()).thenReturn("default");
 
-        List<Issue> issues = GitIgnoreCheck.scan(Arrays.asList(config1));
+        List<Issue> issues = new GitIgnoreCheckImpl().scan(Arrays.asList(config1));
         assertTrue(issues.isEmpty());
     }
 
@@ -60,11 +61,11 @@ class GitIgnoreCheckTest {
         try (FileWriter writer = new FileWriter(emptyConfig)) {
             writer.write("sensitive.files.pattern=\n");
         }
-        bootguard.utils.AppConfig.init(emptyConfig);
+        new bootguard.utils.impl.AppConfigImpl().init(emptyConfig);
 
         lenient().when(config1.getFile()).thenReturn(new File(".env"));
         
-        List<Issue> issues = GitIgnoreCheck.scan(Arrays.asList(config1));
+        List<Issue> issues = new GitIgnoreCheckImpl().scan(Arrays.asList(config1));
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.LOW, issues.get(0).getSeverity());
         

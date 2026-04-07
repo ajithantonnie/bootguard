@@ -1,5 +1,6 @@
-package bootguard.utils;
+package bootguard.utils.impl;
 
+import bootguard.utils.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -9,67 +10,67 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class EntropyUtilTest {
+class EntropyUtilImplTest {
 
     @BeforeEach
     void setUp() {
         // initializing AppConfig so that thresholds are loaded
-        AppConfig.init(null);
+        new bootguard.utils.impl.AppConfigImpl().init(null);
     }
 
     @Test
     void testCalculateEntropyNullOrEmpty() {
-        assertEquals(0.0, EntropyUtil.calculateEntropy(null));
-        assertEquals(0.0, EntropyUtil.calculateEntropy(""));
+        assertEquals(0.0, new bootguard.utils.impl.EntropyUtilImpl().calculateEntropy(null));
+        assertEquals(0.0, new bootguard.utils.impl.EntropyUtilImpl().calculateEntropy(""));
     }
 
     @Test
     void testCalculateMetricEntropyNullOrEmpty() {
-        assertEquals(0.0, EntropyUtil.calculateMetricEntropy(null));
-        assertEquals(0.0, EntropyUtil.calculateMetricEntropy(""));
+        assertEquals(0.0, new EntropyUtilImpl().calculateMetricEntropy(null));
+        assertEquals(0.0, new EntropyUtilImpl().calculateMetricEntropy(""));
     }
 
     @Test
     void testCalculateMetricEntropyAllSameChar() {
-        assertEquals(0.0, EntropyUtil.calculateMetricEntropy("aaaaaa"));
+        assertEquals(0.0, new EntropyUtilImpl().calculateMetricEntropy("aaaaaa"));
     }
 
     @Test
     void testCalculateMetricEntropySingleChar() {
-        assertEquals(0.0, EntropyUtil.calculateMetricEntropy("a"));
+        assertEquals(0.0, new EntropyUtilImpl().calculateMetricEntropy("a"));
     }
 
     @Test
     void testCalculateMetricEntropyHex() {
-        double entropy = EntropyUtil.calculateMetricEntropy("1a2b3c4d5e6f");
+        double entropy = new EntropyUtilImpl().calculateMetricEntropy("1a2b3c4d5e6f");
         assertTrue(entropy > 0);
     }
 
     @Test
     void testCalculateMetricEntropyBase64() {
-        double entropy = EntropyUtil.calculateMetricEntropy("aB1+cD2/eF==");
+        double entropy = new EntropyUtilImpl().calculateMetricEntropy("aB1+cD2/eF==");
         assertTrue(entropy > 0);
     }
 
     @Test
     void testCalculateMetricEntropyGeneralAscii() {
-        double entropy = EntropyUtil.calculateMetricEntropy("Hello World! 123");
+        double entropy = new EntropyUtilImpl().calculateMetricEntropy("Hello World! 123");
         assertTrue(entropy > 0);
     }
 
     @Test
     void testCheckSecretIgnoredCriteria() {
-        EntropyUtil.DetectionResult result1 = EntropyUtil.checkSecret("pass", null);
+        EntropyUtil.DetectionResult result1 = new bootguard.utils.impl.EntropyUtilImpl().checkSecret("pass", null);
         assertFalse(result1.isCaught);
         assertEquals("Ignored criteria", result1.reason);
 
-        EntropyUtil.DetectionResult result2 = EntropyUtil.checkSecret("pass", "short");
+        EntropyUtil.DetectionResult result2 = new bootguard.utils.impl.EntropyUtilImpl().checkSecret("pass", "short");
         assertFalse(result2.isCaught);
 
-        EntropyUtil.DetectionResult result3 = EntropyUtil.checkSecret("pass", "${spring.datasource.password}");
+        EntropyUtil.DetectionResult result3 = new bootguard.utils.impl.EntropyUtilImpl().checkSecret("pass", "${spring.datasource.password}");
         assertFalse(result3.isCaught);
 
-        EntropyUtil.DetectionResult result4 = EntropyUtil.checkSecret("pass", "http://example.com/api/key");
+        EntropyUtil.DetectionResult result4 = new bootguard.utils.impl.EntropyUtilImpl().checkSecret("pass", "http://example.com/api/key");
         assertFalse(result4.isCaught);
     }
 
@@ -88,7 +89,7 @@ class EntropyUtilTest {
         // Actually, to hit the 'pattern != null' branch I need to call it when they ARE null but AppConfig has them.
         // Since I can't easily reset static fields in a simple way without reflection, I'll focus on what's left.
         
-        AppConfig.init(customConfig);
+        new bootguard.utils.impl.AppConfigImpl().init(customConfig);
         
         // This won't hit the '!= null' branches in getKeywordPattern because they are already set.
         // But it verifies logic.
@@ -99,7 +100,7 @@ class EntropyUtilTest {
     @Test
     void testCheckSecretKeywordAndHighEntropy() {
         // High entropy string > 0.75 and keyword "password"
-        EntropyUtil.DetectionResult result = EntropyUtil.checkSecret("db.password", "g$7H!k9L@m4N#p2Q&");
+        EntropyUtil.DetectionResult result = new bootguard.utils.impl.EntropyUtilImpl().checkSecret("db.password", "g$7H!k9L@m4N#p2Q&");
         assertTrue(result.isCaught);
         assertEquals("HIGH", result.severity);
         assertEquals("Keyword + high entropy", result.reason);
@@ -108,7 +109,7 @@ class EntropyUtilTest {
     @Test
     void testCheckSecretSuspiciousHighEntropyNoKeyword() {
         // Extremely high entropy, no keyword
-        EntropyUtil.DetectionResult result = EntropyUtil.checkSecret("random.config.value", "aBcdEfGhIjKlMnOpQrStUvWxYz1234567890!@#$%^&*()");
+        EntropyUtil.DetectionResult result = new bootguard.utils.impl.EntropyUtilImpl().checkSecret("random.config.value", "aBcdEfGhIjKlMnOpQrStUvWxYz1234567890!@#$%^&*()");
         assertTrue(result.isCaught, "Should be caught due to high entropy");
         assertEquals("MEDIUM", result.severity);
         assertEquals("Suspicious high-entropy value", result.reason);
@@ -117,7 +118,7 @@ class EntropyUtilTest {
     @Test
     void testCheckSecretKeywordWeak() {
         // Keyword but weak entropy. We use repeated chars to ensure entropy is low.
-        EntropyUtil.DetectionResult result = EntropyUtil.checkSecret("my.token", "aaaaaaaaaabbbbbbbbbb");
+        EntropyUtil.DetectionResult result = new bootguard.utils.impl.EntropyUtilImpl().checkSecret("my.token", "aaaaaaaaaabbbbbbbbbb");
         assertTrue(result.isCaught);
         assertEquals("MEDIUM", result.severity);
         assertEquals("Keyword match (weak secret)", result.reason);
@@ -128,10 +129,10 @@ class EntropyUtilTest {
         // Using a config that has no thresholds defined to trigger fallbacks
         File emptyConfig = File.createTempFile("empty", ".properties");
         emptyConfig.createNewFile();
-        AppConfig.init(emptyConfig);
+        new bootguard.utils.impl.AppConfigImpl().init(emptyConfig);
         
         // This should use 0.75 and 0.85 fallbacks
-        EntropyUtil.DetectionResult result = EntropyUtil.checkSecret("my.password", "g$7H!k9L@m4N#p2Q&");
+        EntropyUtil.DetectionResult result = new bootguard.utils.impl.EntropyUtilImpl().checkSecret("my.password", "g$7H!k9L@m4N#p2Q&");
         assertTrue(result.isCaught);
         assertEquals("HIGH", result.severity);
         
@@ -142,10 +143,10 @@ class EntropyUtilTest {
     void testMinLengthFallback() throws IOException {
         File emptyConfig = File.createTempFile("empty", ".properties");
         emptyConfig.createNewFile();
-        AppConfig.init(emptyConfig);
+        new bootguard.utils.impl.AppConfigImpl().init(emptyConfig);
 
         // Fallback is 8. "1234567" is length 7.
-        EntropyUtil.DetectionResult result = EntropyUtil.checkSecret("key", "1234567");
+        EntropyUtil.DetectionResult result = new bootguard.utils.impl.EntropyUtilImpl().checkSecret("key", "1234567");
         assertFalse(result.isCaught);
         
         emptyConfig.delete();

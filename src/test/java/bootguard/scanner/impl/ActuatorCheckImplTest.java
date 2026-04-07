@@ -1,5 +1,6 @@
-package bootguard.scanner;
+package bootguard.scanner.impl;
 
+import bootguard.scanner.*;
 import bootguard.utils.FileLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ActuatorCheckTest {
+class ActuatorCheckImplTest {
 
     @Mock
     private FileLoader.ConfigFile configFile;
@@ -36,7 +37,7 @@ class ActuatorCheckTest {
     @Test
     void scan_noExposure_returnsNoIssues() {
         properties.put("management.endpoints.foo", "bar");
-        List<Issue> issues = ActuatorCheck.scan(configFile);
+        List<Issue> issues = new ActuatorCheckImpl().scan(configFile);
         assertTrue(issues.isEmpty());
     }
 
@@ -45,7 +46,7 @@ class ActuatorCheckTest {
         properties.put("management.endpoints.web.exposure.include", "*");
         // By default mgtPort="-1" so it's not locally secured
         
-        List<Issue> issues = ActuatorCheck.scan(configFile);
+        List<Issue> issues = new ActuatorCheckImpl().scan(configFile);
         
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.HIGH, issues.get(0).getSeverity());
@@ -59,7 +60,7 @@ class ActuatorCheckTest {
         properties.put("server.port", "8080");
         properties.put("management.server.address", "localhost");
         
-        List<Issue> issues = ActuatorCheck.scan(configFile);
+        List<Issue> issues = new ActuatorCheckImpl().scan(configFile);
         
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.LOW, issues.get(0).getSeverity());
@@ -72,7 +73,7 @@ class ActuatorCheckTest {
         properties.put("server.port", "8080");
         properties.put("management.server.address", "127.0.0.1");
         
-        List<Issue> issues = ActuatorCheck.scan(configFile);
+        List<Issue> issues = new ActuatorCheckImpl().scan(configFile);
         
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.LOW, issues.get(0).getSeverity());
@@ -81,7 +82,7 @@ class ActuatorCheckTest {
     @Test
     void scan_sensitiveExposedEnv_returnsHighIssue() {
         properties.put("management.endpoints.web.exposure.include", "env,info");
-        List<Issue> issues = ActuatorCheck.scan(configFile);
+        List<Issue> issues = new ActuatorCheckImpl().scan(configFile);
         
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.HIGH, issues.get(0).getSeverity());
@@ -91,21 +92,21 @@ class ActuatorCheckTest {
     @Test
     void scan_sensitiveExposedHeapdump_returnsHighIssue() {
         properties.put("management.endpoints.web.exposure.include", "heapdump");
-        List<Issue> issues = ActuatorCheck.scan(configFile);
+        List<Issue> issues = new ActuatorCheckImpl().scan(configFile);
         assertEquals(1, issues.size());
     }
 
     @Test
     void scan_sensitiveExposedThreaddump_returnsHighIssue() {
         properties.put("management.endpoints.web.exposure.include", "threaddump");
-        List<Issue> issues = ActuatorCheck.scan(configFile);
+        List<Issue> issues = new ActuatorCheckImpl().scan(configFile);
         assertEquals(1, issues.size());
     }
 
     @Test
     void scan_safeExposed_returnsNoIssues() {
         properties.put("management.endpoints.web.exposure.include", "info,health");
-        List<Issue> issues = ActuatorCheck.scan(configFile);
+        List<Issue> issues = new ActuatorCheckImpl().scan(configFile);
         assertTrue(issues.isEmpty());
     }
 }

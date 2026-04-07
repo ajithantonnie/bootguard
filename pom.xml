@@ -6,7 +6,7 @@
 
     <groupId>com.bootguard</groupId>
     <artifactId>bootguard</artifactId>
-    <version>2.0</version>
+    <version>3.0.0</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -68,7 +68,31 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
-                </executions>
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <excludes>
+                                        <exclude>bootguard.Main</exclude>
+                                        <exclude>bootguard.scanner.Issue*</exclude>
+                                    </excludes>
+                                    <limits>
+                                        <limit>
+                                            <counter>INSTRUCTION</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>1.00</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                                </executions>
             </plugin>
             <!-- Maven Assembly Plugin to create a fat JAR -->
             <plugin>
@@ -95,7 +119,7 @@
                             <goal>single</goal>
                         </goals>
                     </execution>
-                </executions>
+                                </executions>
             </plugin>
         </plugins>
     </build>

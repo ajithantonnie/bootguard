@@ -1,5 +1,6 @@
-package bootguard.scanner;
+package bootguard.scanner.impl;
 
+import bootguard.scanner.*;
 import bootguard.utils.FileLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class SecurityHeaderCheckTest {
+class SecurityHeaderCheckImplTest {
 
     @Mock
     private FileLoader.ConfigFile configFile;
@@ -38,7 +39,7 @@ class SecurityHeaderCheckTest {
         properties.put("spring.web.security.header.content-type-options.enabled", "false");
         properties.put("server.ssl.hsts", "none");
 
-        List<Issue> issues = SecurityHeaderCheck.scan(configFile);
+        List<Issue> issues = new SecurityHeaderCheckImpl().scan(configFile);
         assertEquals(4, issues.size());
         
         assertTrue(issues.stream().anyMatch(i -> i.getDescription().contains("XSS")));
@@ -54,14 +55,14 @@ class SecurityHeaderCheckTest {
         properties.put("spring.web.security.header.content-type-options.enabled", "true");
         properties.put("server.ssl.hsts", "max-age=31536000");
 
-        List<Issue> issues = SecurityHeaderCheck.scan(configFile);
+        List<Issue> issues = new SecurityHeaderCheckImpl().scan(configFile);
         assertTrue(issues.isEmpty());
     }
 
     @Test
     void scan_hstsNone_returnsMediumIssue() {
         properties.put("server.ssl.hsts", "NONE");
-        List<Issue> issues = SecurityHeaderCheck.scan(configFile);
+        List<Issue> issues = new SecurityHeaderCheckImpl().scan(configFile);
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.MEDIUM, issues.get(0).getSeverity());
     }

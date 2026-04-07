@@ -25,7 +25,7 @@ class AppConfigTest {
             writer.write("test.list=a, b, c\n");
             writer.write("test.empty.list=\n");
         }
-        AppConfig.init(tempFile);
+        new bootguard.utils.impl.AppConfigImpl().init(tempFile);
     }
 
     @AfterEach
@@ -37,47 +37,47 @@ class AppConfigTest {
 
     @Test
     void testInitWithNullFile() {
-        AppConfig.init(null);
+        new bootguard.utils.impl.AppConfigImpl().init(null);
         // Should not throw exception and should retain existing or default properties
-        assertEquals("hello", AppConfig.getString("test.string"));
+        assertEquals("hello", new bootguard.utils.impl.AppConfigImpl().getString("test.string"));
     }
 
     @Test
     void testInitWithNonExistentFile() {
-        AppConfig.init(new File("does-not-exist.properties"));
-        assertEquals("hello", AppConfig.getString("test.string"));
+        new bootguard.utils.impl.AppConfigImpl().init(new File("does-not-exist.properties"));
+        assertEquals("hello", new bootguard.utils.impl.AppConfigImpl().getString("test.string"));
     }
 
     @Test
     void testGetString() {
-        assertEquals("hello", AppConfig.getString("test.string"));
-        assertNull(AppConfig.getString("non.existent"));
+        assertEquals("hello", new bootguard.utils.impl.AppConfigImpl().getString("test.string"));
+        assertNull(new bootguard.utils.impl.AppConfigImpl().getString("non.existent"));
     }
 
     @Test
     void testGetInt() {
-        assertEquals(42, AppConfig.getInt("test.int"));
-        assertEquals(0, AppConfig.getInt("non.existent")); // default is 0 for missing
+        assertEquals(42, new bootguard.utils.impl.AppConfigImpl().getInt("test.int"));
+        assertEquals(0, new bootguard.utils.impl.AppConfigImpl().getInt("non.existent")); // default is 0 for missing
     }
 
     @Test
     void testGetDouble() {
-        assertEquals(3.14, AppConfig.getDouble("test.double"), 0.001);
-        assertEquals(0.0, AppConfig.getDouble("non.existent"), 0.001); // default is 0.0 for missing
+        assertEquals(3.14, new bootguard.utils.impl.AppConfigImpl().getDouble("test.double"), 0.001);
+        assertEquals(0.0, new bootguard.utils.impl.AppConfigImpl().getDouble("non.existent"), 0.001); // default is 0.0 for missing
     }
 
     @Test
     void testGetStringList() {
-        List<String> list = AppConfig.getStringList("test.list");
+        List<String> list = new bootguard.utils.impl.AppConfigImpl().getStringList("test.list");
         assertEquals(3, list.size());
         assertEquals("a", list.get(0));
         assertEquals("b", list.get(1));
         assertEquals("c", list.get(2));
         
-        List<String> emptyList = AppConfig.getStringList("test.empty.list");
+        List<String> emptyList = new bootguard.utils.impl.AppConfigImpl().getStringList("test.empty.list");
         assertTrue(emptyList.isEmpty());
         
-        List<String> nullList = AppConfig.getStringList("non.existent");
+        List<String> nullList = new bootguard.utils.impl.AppConfigImpl().getStringList("non.existent");
         assertTrue(nullList.isEmpty());
     }
 }

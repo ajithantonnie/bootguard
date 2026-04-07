@@ -1,6 +1,6 @@
 package bootguard;
 
-import bootguard.scanner.*;
+import bootguard.scanner.impl.*;
 import bootguard.utils.AppConfig;
 import bootguard.utils.EntropyUtil;
 import bootguard.utils.FileLoader;
@@ -10,17 +10,17 @@ class CoverageCheckTest {
 
     @Test
     void testConstructorsForStaticClasses() {
-        new ActuatorCheck();
-        new CorsCheck();
-        new DBConfigCheck();
-        new DebugCheck();
-        new ExposureCheck();
-        new GitIgnoreCheck();
-        new H2ConsoleCheck();
-        new SecretScanner();
-        new SecurityHeaderCheck();
-        new AppConfig();
-        new EntropyUtil();
-        new FileLoader();
+        new bootguard.scanner.impl.ActuatorCheckImpl();
+        new bootguard.scanner.impl.CorsCheckImpl();
+        new bootguard.scanner.impl.DBConfigCheckImpl();
+        new bootguard.scanner.impl.DebugCheckImpl();
+        new bootguard.scanner.impl.ExposureCheckImpl();
+        new bootguard.scanner.impl.GitIgnoreCheckImpl();
+        new bootguard.scanner.impl.H2ConsoleCheckImpl();
+        new bootguard.scanner.impl.SecretScannerImpl();
+        new bootguard.scanner.impl.SecurityHeaderCheckImpl();
+        new bootguard.utils.impl.AppConfigImpl();
+        new bootguard.utils.impl.EntropyUtilImpl();
+        new bootguard.utils.impl.FileLoaderImpl();
     }
 }

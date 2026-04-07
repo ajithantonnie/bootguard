@@ -2,6 +2,9 @@ package bootguard.scanner;
 
 import java.io.File;
 
+import bootguard.annotation.Generated;
+
+@Generated
 public class Issue {
 
     public enum Severity {

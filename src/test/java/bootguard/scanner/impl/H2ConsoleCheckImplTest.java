@@ -1,5 +1,6 @@
-package bootguard.scanner;
+package bootguard.scanner.impl;
 
+import bootguard.scanner.*;
 import bootguard.utils.AppConfig;
 import bootguard.utils.FileLoader;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class H2ConsoleCheckTest {
+class H2ConsoleCheckImplTest {
 
     @Mock
     private FileLoader.ConfigFile configFile;
@@ -28,7 +29,7 @@ class H2ConsoleCheckTest {
 
     @BeforeEach
     void setUp() {
-        AppConfig.init(null);
+        new bootguard.utils.impl.AppConfigImpl().init(null);
         properties = new HashMap<>();
         lenient().when(configFile.getProperties()).thenReturn(properties);
         lenient().when(configFile.getFile()).thenReturn(new File("test.yml"));
@@ -38,7 +39,7 @@ class H2ConsoleCheckTest {
     @Test
     void scan_h2Disabled_returnsNoIssues() {
         properties.put("spring.h2.console.enabled", "false");
-        List<Issue> issues = H2ConsoleCheck.scan(configFile);
+        List<Issue> issues = new H2ConsoleCheckImpl().scan(configFile);
         assertTrue(issues.isEmpty());
     }
 
@@ -48,7 +49,7 @@ class H2ConsoleCheckTest {
         properties.put("spring.h2.console.settings.web-allow-others", "true");
         properties.put("spring.datasource.password", "strongpwd");
         
-        List<Issue> issues = H2ConsoleCheck.scan(configFile);
+        List<Issue> issues = new H2ConsoleCheckImpl().scan(configFile);
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.HIGH, issues.get(0).getSeverity());
         assertEquals("H2 Console is exposed to remote access", issues.get(0).getDescription());
@@ -59,7 +60,7 @@ class H2ConsoleCheckTest {
         properties.put("spring.h2.console.enabled", "true");
         properties.put("spring.datasource.password", "  ");
         
-        List<Issue> issues = H2ConsoleCheck.scan(configFile);
+        List<Issue> issues = new H2ConsoleCheckImpl().scan(configFile);
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.MEDIUM, issues.get(0).getSeverity());
         assertEquals("H2 Console enabled with no database password set", issues.get(0).getDescription());
@@ -69,7 +70,7 @@ class H2ConsoleCheckTest {
     void scan_h2Enabled_nullPassword_returnsMediumIssue() {
         properties.put("spring.h2.console.enabled", "true");
         
-        List<Issue> issues = H2ConsoleCheck.scan(configFile);
+        List<Issue> issues = new H2ConsoleCheckImpl().scan(configFile);
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.MEDIUM, issues.get(0).getSeverity());
     }
@@ -79,7 +80,7 @@ class H2ConsoleCheckTest {
         properties.put("spring.h2.console.enabled", "true");
         properties.put("spring.datasource.password", "password");
         
-        List<Issue> issues = H2ConsoleCheck.scan(configFile);
+        List<Issue> issues = new H2ConsoleCheckImpl().scan(configFile);
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.HIGH, issues.get(0).getSeverity());
         assertEquals("H2 Console enabled with a weak database password", issues.get(0).getDescription());
@@ -90,26 +91,26 @@ class H2ConsoleCheckTest {
         properties.put("spring.h2.console.enabled", "true");
         properties.put("spring.datasource.password", "root");
         
-        List<Issue> issues = H2ConsoleCheck.scan(configFile);
+        List<Issue> issues = new H2ConsoleCheckImpl().scan(configFile);
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.HIGH, issues.get(0).getSeverity());
     }
 
     @Test
     void scan_h2Enabled_noConfig_usesInternalDefaults() throws IOException {
-        // We need to bypass AppConfig.init to have empty weakPasswords
+        // We need to bypass new bootguard.utils.impl.AppConfigImpl().init to have empty weakPasswords
         // But AppConfig is static and init(null) loads defaults.
         // Let's use a temp config with empty list
         File emptyConfig = File.createTempFile("empty", ".properties");
         try (FileWriter writer = new FileWriter(emptyConfig)) {
             writer.write("h2.weak.passwords=\n");
         }
-        bootguard.utils.AppConfig.init(emptyConfig);
+        new bootguard.utils.impl.AppConfigImpl().init(emptyConfig);
         
         properties.put("spring.h2.console.enabled", "true");
         properties.put("spring.datasource.password", "admin"); // admin is in internal fallback
         
-        List<Issue> issues = H2ConsoleCheck.scan(configFile);
+        List<Issue> issues = new H2ConsoleCheckImpl().scan(configFile);
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.HIGH, issues.get(0).getSeverity());
         

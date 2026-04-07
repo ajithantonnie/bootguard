@@ -52,4 +52,17 @@ class IssueTest {
         String result = issue.toString();
         assertTrue(result.contains("\u001B[36m")); // Cyan
     }
+
+    @Test
+    void testToStringDefault() {
+        File mockFile = new File("test.txt");
+        Issue issue = new Issue(null, "Desc", "Det", mockFile, "p");
+        Exception ex = null;
+        try {
+            issue.toString();
+        } catch (NullPointerException e) {
+            ex = e;
+        }
+        assertNotNull(ex); // default branch throws NPE during switch
+    }
 }

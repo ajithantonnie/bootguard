@@ -1,6 +1,7 @@
 package bootguard;
 
 import bootguard.scanner.*;
+import bootguard.scanner.impl.*;
 import bootguard.utils.FileLoader;
 import picocli.CommandLine;
 
@@ -17,10 +18,12 @@ public class Main implements Callable<Integer> {
     @CommandLine.Parameters(index = "0", description = "The directory of the Spring Boot project to scan.")
     private File projectDir;
 
-    @CommandLine.Option(names = {"-f", "--fail-on"}, description = "Fail with non-zero exit code if issues of this severity or higher are found. Valid values: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}", defaultValue = "HIGH")
+    @CommandLine.Option(names = { "-f",
+            "--fail-on" }, description = "Fail with non-zero exit code if issues of this severity or higher are found. Valid values: ${COMPLETION-CANDIDATES}. Default: ${DEFAULT-VALUE}", defaultValue = "HIGH")
     private Issue.Severity failOnSeverity;
 
-    @CommandLine.Option(names = {"-c", "--config"}, description = "Path to custom bootguard.properties configuration file.")
+    @CommandLine.Option(names = { "-c",
+            "--config" }, description = "Path to custom bootguard.properties configuration file.")
     private File configFile;
 
     public static void main(String[] args) {
@@ -39,9 +42,10 @@ public class Main implements Callable<Integer> {
 
         File parentDir = projectDir.isDirectory() ? projectDir : projectDir.getParentFile();
         File configToUse = configFile != null ? configFile : new File(parentDir, "bootguard.properties");
-        bootguard.utils.AppConfig.init(configToUse);
+        new bootguard.utils.impl.AppConfigImpl().init(configToUse);
 
-        List<FileLoader.ConfigFile> configs = FileLoader.loadConfigs(projectDir, configToUse);
+        List<FileLoader.ConfigFile> configs = new bootguard.utils.impl.FileLoaderImpl().loadConfigs(projectDir,
+                configToUse);
         if (configs.isEmpty()) {
             System.out.println("No configuration files found. Scan complete.");
             return 0;
@@ -50,23 +54,24 @@ public class Main implements Callable<Integer> {
         List<Issue> allIssues = new ArrayList<>();
 
         for (FileLoader.ConfigFile config : configs) {
-            allIssues.addAll(ActuatorCheck.scan(config));
-            allIssues.addAll(SecretScanner.scan(config));
-            allIssues.addAll(DBConfigCheck.scan(config));
-            allIssues.addAll(CorsCheck.scan(config));
-            allIssues.addAll(H2ConsoleCheck.scan(config));
-            allIssues.addAll(SecurityHeaderCheck.scan(config));
-            allIssues.addAll(ExposureCheck.scan(config));
+            allIssues.addAll(new ActuatorCheckImpl().scan(config));
+            allIssues.addAll(new SecretScannerImpl().scan(config));
+            allIssues.addAll(new DBConfigCheckImpl().scan(config));
+            allIssues.addAll(new CorsCheckImpl().scan(config));
+            allIssues.addAll(new H2ConsoleCheckImpl().scan(config));
+            allIssues.addAll(new SecurityHeaderCheckImpl().scan(config));
+            allIssues.addAll(new ExposureCheckImpl().scan(config));
         }
 
-        allIssues.addAll(DebugCheck.scan(configs));
-        allIssues.addAll(GitIgnoreCheck.scan(configs));
+        allIssues.addAll(new DebugCheckImpl().scan(configs));
+        allIssues.addAll(new GitIgnoreCheckImpl().scan(configs));
 
         // Downgrade dev-level risks to LOW severity if they belong to non-prod profiles
         for (Issue issue : allIssues) {
             String fileName = issue.getFile().getName().toLowerCase();
-            boolean isDevFile = fileName.contains("-dev.") || fileName.contains("-local.") || fileName.contains("-test.");
-            
+            boolean isDevFile = fileName.contains("-dev.") || fileName.contains("-local.")
+                    || fileName.contains("-test.");
+
             String profileContext = issue.getProfileContext();
             boolean isNonProdProfile = profileContext != null && !profileContext.toLowerCase().contains("prod");
 
@@ -91,14 +96,15 @@ public class Main implements Callable<Integer> {
         String bold = "\u001B[1m";
         String red = "\u001B[31m";
         String reset = "\u001B[0m";
-        System.out.println(bold + "Scan complete: " + allIssues.size() + " issues found (" + 
-            highCount + " High, " + mediumCount + " Medium, " + lowCount + " Low)" + reset);
+        System.out.println(bold + "Scan complete: " + allIssues.size() + " issues found (" +
+                highCount + " High, " + mediumCount + " Medium, " + lowCount + " Low)" + reset);
 
         boolean shouldFail = allIssues.stream()
                 .anyMatch(issue -> issue.getSeverity().compareTo(failOnSeverity) <= 0);
 
         if (shouldFail) {
-            System.err.println("\n" + red + bold + "[FAILED] Issues found exceeding severity threshold: " + failOnSeverity + reset);
+            System.err.println("\n" + red + bold + "[FAILED] Issues found exceeding severity threshold: "
+                    + failOnSeverity + reset);
             return 1;
         }
 

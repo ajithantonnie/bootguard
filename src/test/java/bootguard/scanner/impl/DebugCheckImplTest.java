@@ -1,5 +1,6 @@
-package bootguard.scanner;
+package bootguard.scanner.impl;
 
+import bootguard.scanner.*;
 import bootguard.utils.FileLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class DebugCheckTest {
+class DebugCheckImplTest {
 
     @Mock
     private FileLoader.ConfigFile configDev;
@@ -47,7 +48,7 @@ class DebugCheckTest {
         propsDev.put("debug", "true");
         propsProd.put("spring.profiles.active", "prod");
 
-        List<Issue> issues = DebugCheck.scan(Arrays.asList(configDev, configProd));
+        List<Issue> issues = new DebugCheckImpl().scan(Arrays.asList(configDev, configProd));
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.HIGH, issues.get(0).getSeverity());
         assertEquals("Debug enabled in production profile", issues.get(0).getDescription());
@@ -57,7 +58,7 @@ class DebugCheckTest {
     void scan_debugTrueNoProdProfile_returnsLowIssue() {
         propsDev.put("debug", "true");
 
-        List<Issue> issues = DebugCheck.scan(Arrays.asList(configDev, configProd));
+        List<Issue> issues = new DebugCheckImpl().scan(Arrays.asList(configDev, configProd));
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.LOW, issues.get(0).getSeverity());
         assertEquals("Debug enabled", issues.get(0).getDescription());
@@ -67,7 +68,7 @@ class DebugCheckTest {
     void scan_noDebug_returnsNoIssues() {
         propsProd.put("spring.profiles.active", "prod");
 
-        List<Issue> issues = DebugCheck.scan(Arrays.asList(configDev, configProd));
+        List<Issue> issues = new DebugCheckImpl().scan(Arrays.asList(configDev, configProd));
         assertTrue(issues.isEmpty());
     }
 }

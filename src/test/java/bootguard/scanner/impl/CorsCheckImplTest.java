@@ -1,5 +1,6 @@
-package bootguard.scanner;
+package bootguard.scanner.impl;
 
+import bootguard.scanner.*;
 import bootguard.utils.FileLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CorsCheckTest {
+class CorsCheckImplTest {
 
     @Mock
     private FileLoader.ConfigFile configFile;
@@ -36,7 +37,7 @@ class CorsCheckTest {
     @Test
     void scan_corsWildcard_returnsHighIssue() {
         properties.put("spring.web.cors.allowed-origins", "*");
-        List<Issue> issues = CorsCheck.scan(configFile);
+        List<Issue> issues = new CorsCheckImpl().scan(configFile);
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.HIGH, issues.get(0).getSeverity());
     }
@@ -44,13 +45,13 @@ class CorsCheckTest {
     @Test
     void scan_corsNoWildcard_returnsNoIssues() {
         properties.put("spring.web.cors.allowed-origins", "http://example.com");
-        List<Issue> issues = CorsCheck.scan(configFile);
+        List<Issue> issues = new CorsCheckImpl().scan(configFile);
         assertTrue(issues.isEmpty());
     }
 
     @Test
     void scan_corsNotSet_returnsNoIssues() {
-        List<Issue> issues = CorsCheck.scan(configFile);
+        List<Issue> issues = new CorsCheckImpl().scan(configFile);
         assertTrue(issues.isEmpty());
     }
 }

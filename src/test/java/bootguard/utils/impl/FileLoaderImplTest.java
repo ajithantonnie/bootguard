@@ -1,5 +1,6 @@
-package bootguard.utils;
+package bootguard.utils.impl;
 
+import bootguard.utils.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FileLoaderTest {
+class FileLoaderImplTest {
 
     private Path tempDir;
     private File ignoreFile;
@@ -25,7 +26,7 @@ class FileLoaderTest {
         tempDir = Files.createTempDirectory("bootguard-test");
         ignoreFile = new File(tempDir.toFile(), "bootguard.properties");
         
-        AppConfig.init(null);
+        new bootguard.utils.impl.AppConfigImpl().init(null);
     }
 
     @AfterEach
@@ -39,7 +40,7 @@ class FileLoaderTest {
 
     @Test
     void testLoadConfigsWithNonExistentDir() {
-        List<FileLoader.ConfigFile> configs = FileLoader.loadConfigs(new File("some-random-dir-that-does-not-exist-1234"), null);
+        List<FileLoader.ConfigFile> configs = new bootguard.utils.impl.FileLoaderImpl().loadConfigs(new File("some-random-dir-that-does-not-exist-1234"), null);
         assertTrue(configs.isEmpty());
     }
 
@@ -50,7 +51,7 @@ class FileLoaderTest {
             writer.write("key=value\n");
         }
 
-        List<FileLoader.ConfigFile> configs = FileLoader.loadConfigs(propFile, null);
+        List<FileLoader.ConfigFile> configs = new bootguard.utils.impl.FileLoaderImpl().loadConfigs(propFile, null);
         assertEquals(1, configs.size());
         assertEquals("value", configs.get(0).getProperties().get("key"));
     }
@@ -82,7 +83,7 @@ class FileLoaderTest {
         File ignoreProp = new File(ignoreDir, "ignored.properties");
         try (FileWriter writer = new FileWriter(ignoreProp)) { writer.write("ignore=true"); }
 
-        List<FileLoader.ConfigFile> configs = FileLoader.loadConfigs(tempDir.toFile(), ignoreFile);
+        List<FileLoader.ConfigFile> configs = new bootguard.utils.impl.FileLoaderImpl().loadConfigs(tempDir.toFile(), ignoreFile);
         
         // Should find 1 properties file and 2 yaml documents
         assertEquals(3, configs.size());
@@ -116,11 +117,11 @@ class FileLoaderTest {
             writer.write("some.prop=value\n");
         }
         
-        List<FileLoader.ConfigFile> configs = FileLoader.loadConfigs(tempDir.toFile(), ignoreFile);
+        List<FileLoader.ConfigFile> configs = new bootguard.utils.impl.FileLoaderImpl().loadConfigs(tempDir.toFile(), ignoreFile);
         // ignoreFile should be skipped
         assertTrue(configs.isEmpty());
 
-        List<FileLoader.ConfigFile> configsSingle = FileLoader.loadConfigs(ignoreFile, ignoreFile);
+        List<FileLoader.ConfigFile> configsSingle = new bootguard.utils.impl.FileLoaderImpl().loadConfigs(ignoreFile, ignoreFile);
         assertTrue(configsSingle.isEmpty());
     }
 
@@ -131,7 +132,7 @@ class FileLoaderTest {
             writer.write("key=value\n");
         }
         
-        List<FileLoader.ConfigFile> configs = FileLoader.loadConfigs(tempDir.toFile(), null);
+        List<FileLoader.ConfigFile> configs = new bootguard.utils.impl.FileLoaderImpl().loadConfigs(tempDir.toFile(), null);
         // "bootguard" anywhere in the name ending with .properties is ignored
         assertTrue(configs.isEmpty());
     }
@@ -144,7 +145,7 @@ class FileLoaderTest {
         }
         
         // This will trigger exception inside loop but shouldn't crash app
-        List<FileLoader.ConfigFile> configs = FileLoader.loadConfigs(badYaml, null);
+        List<FileLoader.ConfigFile> configs = new bootguard.utils.impl.FileLoaderImpl().loadConfigs(badYaml, null);
         assertTrue(configs.isEmpty());
 
         File unreadableProp = new File(tempDir.toFile(), "unreadable.properties");
@@ -152,12 +153,12 @@ class FileLoaderTest {
         // Passing a directory as if it's a properties/yaml file causes IOException because FileInputStream fails on dirs
         File dirAsProps = new File(tempDir.toFile(), "dir.properties");
         dirAsProps.mkdir();
-        List<FileLoader.ConfigFile> configsProps = FileLoader.loadConfigs(dirAsProps, null);
+        List<FileLoader.ConfigFile> configsProps = new bootguard.utils.impl.FileLoaderImpl().loadConfigs(dirAsProps, null);
         assertTrue(configsProps.isEmpty());
 
         File dirAsYaml = new File(tempDir.toFile(), "dir.yml");
         dirAsYaml.mkdir();
-        List<FileLoader.ConfigFile> configsYaml = FileLoader.loadConfigs(dirAsYaml, null);
+        List<FileLoader.ConfigFile> configsYaml = new bootguard.utils.impl.FileLoaderImpl().loadConfigs(dirAsYaml, null);
         assertTrue(configsYaml.isEmpty());
     }
 }
