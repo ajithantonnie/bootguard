@@ -1,9 +1,5 @@
 package bootguard;
 
-import bootguard.scanner.impl.*;
-import bootguard.utils.AppConfig;
-import bootguard.utils.EntropyUtil;
-import bootguard.utils.FileLoader;
 import org.junit.jupiter.api.Test;
 
 class CoverageCheckTest {

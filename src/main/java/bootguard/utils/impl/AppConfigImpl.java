@@ -1,7 +1,6 @@
 package bootguard.utils.impl;
 
 import bootguard.utils.AppConfig;
-import bootguard.utils.FileLoader.ConfigFile;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,7 +22,8 @@ public class AppConfigImpl implements AppConfig {
             if (in != null) {
                 properties.load(in);
             } else {
-                System.err.println("Warning: Default configuration bootguard-default.properties not found in resources.");
+                System.err
+                        .println("Warning: Default configuration bootguard-default.properties not found in resources.");
             }
         } catch (IOException e) {
             System.err.println("Error loading default configuration: " + e.getMessage());
@@ -37,7 +37,8 @@ public class AppConfigImpl implements AppConfig {
                 properties.putAll(customProps);
                 System.out.println("Loaded custom configuration from: " + customConfigFile.getAbsolutePath());
             } catch (IOException e) {
-                System.err.println("Error loading custom configuration from " + customConfigFile.getAbsolutePath() + ": " + e.getMessage());
+                System.err.println("Error loading custom configuration from " + customConfigFile.getAbsolutePath()
+                        + ": " + e.getMessage());
             }
         }
     }

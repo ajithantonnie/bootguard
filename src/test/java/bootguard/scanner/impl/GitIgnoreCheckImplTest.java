@@ -1,7 +1,6 @@
 package bootguard.scanner.impl;
 
 import bootguard.scanner.*;
-import bootguard.utils.AppConfig;
 import bootguard.utils.FileLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,8 @@ class GitIgnoreCheckImplTest {
 
     @BeforeEach
     void setUp() {
-        new bootguard.utils.impl.AppConfigImpl().init(null); // Ensure AppConfig loads defaults or is initialized cleanly
+        new bootguard.utils.impl.AppConfigImpl().init(null); // Ensure AppConfig loads defaults or is initialized
+                                                             // cleanly
     }
 
     @Test
@@ -64,11 +64,11 @@ class GitIgnoreCheckImplTest {
         new bootguard.utils.impl.AppConfigImpl().init(emptyConfig);
 
         lenient().when(config1.getFile()).thenReturn(new File(".env"));
-        
+
         List<Issue> issues = new GitIgnoreCheckImpl().scan(Arrays.asList(config1));
         assertEquals(1, issues.size());
         assertEquals(Issue.Severity.LOW, issues.get(0).getSeverity());
-        
+
         emptyConfig.delete();
     }
 }

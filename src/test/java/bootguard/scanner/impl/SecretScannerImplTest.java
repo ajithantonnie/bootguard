@@ -1,7 +1,6 @@
 package bootguard.scanner.impl;
 
 import bootguard.scanner.*;
-import bootguard.utils.EntropyUtil;
 import bootguard.utils.FileLoader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,26 +35,29 @@ class SecretScannerImplTest {
     @Test
     void scan_secretCaughtHighSeverity_returnsHighIssue() {
         properties.put("my.secret", "a1b2c3d4e5f6g7h8i9j0k!@#$%^&*()");
-        
+
         List<Issue> issues = new SecretScannerImpl().scan(configFile);
         assertFalse(issues.isEmpty());
-        // Could be HIGH or MEDIUM depending on entropy threshold, but we just verify it caught it
-        assertTrue(issues.get(0).getDescription().contains("Hardcoded secret found") || issues.get(0).getDescription().contains("Hardcoded risk finding"));
+        // Could be HIGH or MEDIUM depending on entropy threshold, but we just verify it
+        // caught it
+        assertTrue(issues.get(0).getDescription().contains("Hardcoded secret found")
+                || issues.get(0).getDescription().contains("Hardcoded risk finding"));
     }
 
     @Test
     void scan_secretCaughtMediumSeverity_returnsMediumIssue() {
         properties.put("my.api", "weakapi123");
-        
+
         List<Issue> issues = new SecretScannerImpl().scan(configFile);
         assertFalse(issues.isEmpty());
-        assertTrue(issues.get(0).getDescription().contains("Hardcoded risk finding") || issues.get(0).getDescription().contains("Hardcoded secret found"));
+        assertTrue(issues.get(0).getDescription().contains("Hardcoded risk finding")
+                || issues.get(0).getDescription().contains("Hardcoded secret found"));
     }
 
     @Test
     void scan_secretNotCaught_returnsNoIssues() {
         properties.put("app.name", "myApp");
-        
+
         List<Issue> issues = new SecretScannerImpl().scan(configFile);
         assertTrue(issues.isEmpty());
     }
@@ -63,7 +65,7 @@ class SecretScannerImplTest {
     @Test
     void scan_serverHeaderSkipped() {
         properties.put("server.server-header", "something_very_secret_1234567890");
-        
+
         List<Issue> issues = new SecretScannerImpl().scan(configFile);
         assertTrue(issues.isEmpty());
     }
