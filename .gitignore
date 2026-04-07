@@ -45,3 +45,6 @@ buildNumber.properties
 .project
 .classpath
 .settings/
+
+# Local linkedin post file
+linkedin_post.md
